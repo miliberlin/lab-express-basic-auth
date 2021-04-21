@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const favicon = require('serve-favicon');
 const hbs = require('hbs');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const logger = require('morgan');
 const path = require('path');
 
@@ -15,6 +15,25 @@ const app = express();
 
 // require database configuration
 require('./configs/db.config');
+
+// session configuration
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
+const mongoose = require('./configs/db.config');
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    // max age in ms (1 week in this case)
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 14},
+    saveUninitialized: false,
+    resave: true,
+    store: new MongoStore({
+      mongooseConnection: mongoose.connection
+    })
+  })
+)
+
 
 // Middleware Setup
 app.use(logger('dev'));
